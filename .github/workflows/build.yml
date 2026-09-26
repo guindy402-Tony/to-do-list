@@ -23,11 +23,15 @@ jobs:
         PROJECT_DIR=$(find . -name "build.gradle*" -not -path "*/app/*" -exec dirname {} \; | head -n 1)
         echo "Found project at: $PROJECT_DIR"
         cd "$PROJECT_DIR"
+
+        # สร้าง debug.keystore ให้ระบบถ้าหาไม่เจอ
+        keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" || true
+
         chmod +x gradlew 2>/dev/null || true
         if [ -f "./gradlew" ]; then
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
         else
-          gradle assembleDebug
+          gradle assembleDebug --stacktrace
         fi
 
     - name: Upload APK
@@ -35,4 +39,3 @@ jobs:
       with:
         name: app-debug
         path: "**/build/outputs/apk/debug/*.apk"
-
